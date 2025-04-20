@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:979797@db:5432/product_db
+      - SECRET_KEY=production-secret-key
+      - FLASK_APP=run.py
+      - FLASK_ENV=production
+    depends_on:
+      - db
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      - product-network
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=979797
+      - POSTGRES_DB=product_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - product-network
+
+volumes:
+  postgres_data:
+
+networks:
+  product-network:
+    driver: bridge

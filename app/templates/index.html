@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-4">Product Management</h1>
+            <a href="{{ url_for('main.add_product') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+        </div>
+    </div>
+    <div id="alert-container"></div>
+    <div class="row" id="products-container">
+        <!-- Products will be loaded here dynamically -->
+    </div>
+</div>
+
+<script>
+// Constants for URLs
+const API_URL = '/api/products';
+
+function showAlert(message, type = 'danger') {
+    const alertContainer = document.getElementById('alert-container');
+    const alert = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    alertContainer.innerHTML = alert;
+}
+
+function loadProducts() {
+    fetch(API_URL)
+        .then(response => response.json())
+        .then(products => {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            
+            if (products.length === 0) {
+                container.innerHTML = '<div class="col"><p class="text-center">No products found. Add some products to get started!</p></div>';
+                return;
+            }
+
+            products.forEach(product => {
+                const card = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">${product.name}</h5>
+                                <p class="card-text">${product.description || 'No description'}</p>
+                                <p class="card-text">
+                                    <strong>Price:</strong> $${product.price}<br>
+                                    <strong>Stock:</strong> ${product.stock}<br>
+                                    <strong>Category:</strong> ${product.category || 'Uncategorized'}
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent border-0">
+                                <div class="btn-group w-100">
+                                    <a href="/edit_product/${product.id}" class="btn btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <button onclick="deleteProduct(${product.id})" class="btn btn-outline-danger">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                container.innerHTML += card;
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error loading products');
+        });
+}
+
+function deleteProduct(id) {
+    if (!confirm('Are you sure you want to delete this product?')) {
+        return;
+    }
+
+    fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to delete product');
+        }
+        return response.json();
+    })
+    .then(data => {
+        showAlert(data.message, 'success');
+        loadProducts();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error deleting product');
+    });
+}
+
+// Load products when the page loads
+document.addEventListener('DOMContentLoaded', loadProducts);
+</script>
+{% endblock %}

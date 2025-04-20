@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}{% if product %}Edit{% else %}Add{% endif %} Product{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">{% if product %}Edit{% else %}Add{% endif %} Product</h2>
+                </div>
+                <div id="alert-container"></div>
+                <div class="card-body">
+                    <form id="productForm" onsubmit="handleSubmit(event)">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required
+                                value="{{ product.name if product else '' }}" maxlength="100">
+                            <div class="invalid-feedback">Name is required and must be less than 100 characters.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3">{{ product.description if product else '' }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Price</label>
+                            <input type="number" class="form-control" id="price" name="price" step="0.01" required min="0"
+                                value="{{ product.price if product else '' }}">
+                            <div class="invalid-feedback">Price must be greater than or equal to 0.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="stock" class="form-label">Stock</label>
+                            <input type="number" class="form-control" id="stock" name="stock" required min="0"
+                                value="{{ product.stock if product else 0 }}">
+                            <div class="invalid-feedback">Stock must be greater than or equal to 0.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <input type="text" class="form-control" id="category" name="category"
+                                value="{{ product.category if product else '' }}">
+                        </div>
+                        <div class="text-end">
+                            <a href="/" class="btn btn-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showAlert(message, type = 'danger') {
+    const alertContainer = document.getElementById('alert-container');
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+}
+
+function validateForm(formData) {
+    const name = formData.get('name');
+    const price = parseFloat(formData.get('price'));
+    const stock = parseInt(formData.get('stock'));
+    
+    if (!name || name.trim().length === 0) {
+        throw new Error('Name is required');
+    }
+    if (name.length > 100) {
+        throw new Error('Name must be less than 100 characters');
+    }
+    if (isNaN(price) || price < 0) {
+        throw new Error('Price must be a positive number');
+    }
+    if (isNaN(stock) || stock < 0) {
+        throw new Error('Stock must be a non-negative integer');
+    }
+}
+
+async function handleSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    const productId = '{{ product.id if product else "" }}';
+    
+    try {
+        // Client-side validation
+        validateForm(formData);
+        
+        const data = {
+            name: formData.get('name'),
+            description: formData.get('description'),
+            price: parseFloat(formData.get('price')),
+            stock: parseInt(formData.get('stock')),
+            category: formData.get('category')
+        };
+
+        const url = productId ? `/api/products/${productId}` : '/api/products';
+        const method = productId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Failed to save product');
+        }
+
+        window.location.href = '/';
+    } catch (error) {
+        showAlert(error.message);
+        console.error('Error:', error);
+    }
+}
+</script>
+{% endblock %}
