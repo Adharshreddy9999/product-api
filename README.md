@@ -33,7 +33,6 @@ docker-compose up --build
 ```
 
 The application will be available at:
-- Web Interface: http://localhost:5000
 - API Documentation: http://localhost:5000/api/docs
 - API Endpoints: http://localhost:5000/api/
 
