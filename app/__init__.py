@@ -3,9 +3,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS
+from flask_swagger_ui import get_swaggerui_blueprint
 import os
 from .error_handlers import setup_logging, register_error_handlers
 from .config import Config
+from .swagger import template as swagger_template
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -34,6 +36,18 @@ def create_app(config_class=Config):
     
     # Register error handlers
     register_error_handlers(app)
+
+    # Configure Swagger UI
+    SWAGGER_URL = '/api/docs'
+    API_URL = '/static/swagger.json'
+    swaggerui_blueprint = get_swaggerui_blueprint(
+        SWAGGER_URL,
+        API_URL,
+        config={
+            'app_name': "Product Management API"
+        }
+    )
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
     
     with app.app_context():
         # Import parts of our application
@@ -46,6 +60,11 @@ def create_app(config_class=Config):
         # Register blueprints
         app.register_blueprint(main)
         app.register_blueprint(api, url_prefix='/api')  # All API routes will be prefixed with /api
+        
+        # Save Swagger JSON
+        import json
+        with open(os.path.join(app.static_folder, 'swagger.json'), 'w') as f:
+            json.dump(swagger_template, f)
         
         app.logger.info('Application started successfully')
         
@@ -67,4 +86,4 @@ def create_app(config_class=Config):
         for rule in app.url_map.iter_rules():
             print(f"{rule.endpoint}: {rule.rule} [{', '.join(rule.methods)}]")
 
-    return app
+        return app

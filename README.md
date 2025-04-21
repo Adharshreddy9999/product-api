@@ -1,199 +1,263 @@
 # Product Management API
 
-A RESTful API built with Flask and PostgreSQL for managing product inventory.
+## Overview
+The Product Management API is a RESTful service that allows you to manage product inventory with robust validation and error handling.
+
+* Version: 1.0.0
+* Base URL: http://localhost:5000
+* Support: [GitHub Repository](https://github.com/Adharshreddy9999/product-api)
 
 ## Features
 
-- CRUD operations for products
-- PostgreSQL database with SQLAlchemy ORM
-- Input validation with Marshmallow
-- Error handling and logging
-- API documentation with Swagger UI
-- Docker support with docker-compose
-- CORS support
-- Web interface for product management
+* CRUD operations for products
+* Input validation
+* Error handling
+* Logging
+* Database persistence
+* Swagger UI documentation
 
-## Prerequisites
+## Technical Stack
 
-- Docker and Docker Compose
-- Python 3.9+ (for local development)
-- PostgreSQL (for local development)
+* Framework: Flask
+* Database: PostgreSQL
+* ORM: SQLAlchemy
+* Validation: Marshmallow
+* Documentation: Swagger/OpenAPI 3.0
 
-## Quick Start with Docker
+## Setup and Installation
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/Adharshreddy9999/product-api.git
 cd product-api
 ```
 
-2. Start the application with Docker Compose:
-```bash
-docker-compose up --build
-```
-
-The application will be available at:
-- Web Interface: http://localhost:5000
-- API Documentation: http://localhost:5000/api/docs
-- API Endpoints: http://localhost:5000/api/
-
-## Local Development Setup
-
-1. Create a virtual environment and activate it:
+2. Create and activate virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 .\venv\Scripts\activate   # Windows
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables in `.env`:
-```env
-DATABASE_URL=postgresql://postgres:979797@localhost:5432/product_db
-SECRET_KEY=your-secret-key
-FLASK_APP=run.py
-FLASK_ENV=development
+4. Set environment variables:
+```bash
+set DATABASE_URL=postgresql://postgres:979797@localhost:5432/product_db
+set FLASK_APP=run.py
+set FLASK_ENV=development
 ```
 
-4. Initialize the database:
+5. Initialize database:
 ```bash
 flask db upgrade
 ```
 
-5. Run the development server:
+6. Run the application:
 ```bash
-flask run
+python run.py
 ```
 
-## API Documentation
+The application will be available at:
+- Web Interface: http://localhost:5000
+- API Documentation: http://localhost:5000/api/docs
+- API Endpoints: http://localhost:5000/api/products
 
-### Base URL
-`http://localhost:5000/api`
+## API Endpoints
 
-### Authentication
-Currently, the API does not require authentication.
+### 1. List All Products
+`GET /api/products`
 
-### Endpoints
+Retrieves a list of all products in the inventory.
 
-#### GET /products
-Get all products.
-
-Response:
+Response (200 OK):
 ```json
 [
-  {
-    "id": 1,
-    "name": "Product Name",
-    "description": "Product Description",
-    "price": 99.99,
-    "stock": 10,
-    "category": "Category",
-    "created_at": "2025-04-20T12:00:00Z",
-    "updated_at": "2025-04-20T12:00:00Z"
-  }
+    {
+        "id": 1,
+        "name": "Sample Product",
+        "description": "A detailed description of the product",
+        "price": 29.99,
+        "stock": 100,
+        "category": "Electronics",
+        "created_at": "2025-04-21T01:38:11+05:30",
+        "updated_at": "2025-04-21T01:38:11+05:30"
+    }
 ]
 ```
 
-#### POST /products
-Create a new product.
+### 2. Create Product
+`POST /api/products`
+
+Creates a new product in the inventory.
+
+Validation Rules:
+- Name: Required, maximum 100 characters
+- Price: Required, must be non-negative
+- Stock: Required, must be non-negative
 
 Request Body:
 ```json
 {
-  "name": "Product Name",
-  "description": "Product Description",
-  "price": 99.99,
-  "stock": 10,
-  "category": "Category"
+    "name": "New Product",
+    "description": "Product description",
+    "price": 29.99,
+    "stock": 100,
+    "category": "Electronics"
 }
 ```
 
-#### GET /products/{id}
-Get a specific product by ID.
+Response (201 Created):
+```json
+{
+    "id": 1,
+    "name": "New Product",
+    "description": "Product description",
+    "price": 29.99,
+    "stock": 100,
+    "category": "Electronics",
+    "created_at": "2025-04-21T01:38:11+05:30",
+    "updated_at": "2025-04-21T01:38:11+05:30"
+}
+```
 
-#### PUT /products/{id}
-Update a specific product.
+### 3. Get Product by ID
+`GET /api/products/{product_id}`
+
+Retrieves a specific product by its ID.
+
+Response (200 OK):
+```json
+{
+    "id": 1,
+    "name": "Sample Product",
+    "description": "A detailed description of the product",
+    "price": 29.99,
+    "stock": 100,
+    "category": "Electronics",
+    "created_at": "2025-04-21T01:38:11+05:30",
+    "updated_at": "2025-04-21T01:38:11+05:30"
+}
+```
+
+### 4. Update Product
+`PUT /api/products/{product_id}`
+
+Updates an existing product.
+
+Validation Rules:
+- Name: Maximum 100 characters
+- Price: Must be non-negative
+- Stock: Must be non-negative
 
 Request Body:
 ```json
 {
-  "name": "Updated Name",
-  "price": 149.99,
-  "stock": 15
+    "name": "Updated Product",
+    "description": "Updated description",
+    "price": 39.99,
+    "stock": 150,
+    "category": "Electronics"
 }
 ```
 
-#### DELETE /products/{id}
-Delete a specific product.
-
-### Error Responses
-
-The API uses conventional HTTP response codes:
-- 200: Success
-- 201: Created
-- 400: Bad Request
-- 404: Not Found
-- 500: Internal Server Error
-
-Error Response Format:
+Response (200 OK):
 ```json
 {
-  "error": "Error message",
-  "details": {
-    "field": ["Error details"]
-  }
+    "id": 1,
+    "name": "Updated Product",
+    "description": "Updated description",
+    "price": 39.99,
+    "stock": 150,
+    "category": "Electronics",
+    "created_at": "2025-04-21T01:38:11+05:30",
+    "updated_at": "2025-04-21T01:38:11+05:30"
 }
 ```
 
-## Logging
+### 5. Delete Product
+`DELETE /api/products/{product_id}`
 
-Logs are stored in `app.log` with rotation enabled:
-- Maximum log file size: 10KB
-- Backup count: 3 files
-- Log format: `timestamp level: message`
+Deletes a product from the inventory.
 
-## Database Schema
-
-### Products Table
-- id: Integer (Primary Key)
-- name: String(100)
-- description: String(500)
-- price: Decimal(10,2)
-- stock: Integer
-- category: String(50)
-- created_at: DateTime
-- updated_at: DateTime
-
-## Project Structure
-
-```
-product_api/
-├── app/
-│   ├── __init__.py      # Flask application factory
-│   ├── models.py        # Database models
-│   ├── routes.py        # API routes
-│   ├── schemas.py       # Marshmallow schemas
-│   └── config.py        # Configuration
-├── migrations/          # Database migrations
-├── Dockerfile          # Docker configuration
-├── docker-compose.yml  # Docker Compose configuration
-├── requirements.txt    # Python dependencies
-├── run.py             # Application entry point
-└── README.md          # Project documentation
+Response (200 OK):
+```json
+{
+    "message": "Product deleted successfully"
+}
 ```
 
-## Contributing
+## Error Responses
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+### 1. Validation Error (400 Bad Request)
+```json
+{
+    "error": "Validation error",
+    "message": "Price cannot be negative"
+}
+```
 
-## License
+### 2. Not Found Error (404 Not Found)
+```json
+{
+    "error": "Product not found"
+}
+```
 
-This project is licensed under the MIT License.
+### 3. Server Error (500 Internal Server Error)
+```json
+{
+    "error": "Internal server error"
+}
+```
+
+## Testing the API
+
+1. Using Swagger UI:
+   - Visit http://localhost:5000/api/docs
+   - Use the interactive documentation to test endpoints
+
+2. Using cURL:
+```bash
+# List all products
+curl http://localhost:5000/api/products
+
+# Create a product
+curl -X POST http://localhost:5000/api/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Test Product","price":29.99,"stock":100}'
+```
+
+## Error Logging
+
+The application logs errors and events to:
+- Console (for development)
+- logs/app.log (for production)
+
+## Security Considerations
+
+1. Input Validation
+   - All inputs are validated before processing
+   - Prevents negative prices and stock values
+   - Enforces maximum length for text fields
+
+2. Error Handling
+   - Sanitized error messages
+   - No sensitive information in responses
+   - Proper HTTP status codes
+
+## Future Enhancements
+
+1. Authentication and Authorization
+2. Rate Limiting
+3. Product Categories Management
+4. Image Upload Support
+5. Advanced Search and Filtering
+6. Pagination Support
+
+## Support
+
+For support and bug reports, please create an issue on our [GitHub repository](https://github.com/Adharshreddy9999/product-api).

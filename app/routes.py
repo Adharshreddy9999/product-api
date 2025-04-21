@@ -21,6 +21,21 @@ def handle_generic_error(e):
     return jsonify({"error": "Internal server error"}), 500
 
 # API Routes
+@api.route('/')
+def api_root():
+    return jsonify({
+        "message": "Welcome to the Product Management API",
+        "version": "1.0.0",
+        "endpoints": {
+            "List all products": "/api/products",
+            "Get product by ID": "/api/products/<id>",
+            "Create product": "/api/products",
+            "Update product": "/api/products/<id>",
+            "Delete product": "/api/products/<id>",
+            "API Documentation": "/api/docs"
+        }
+    })
+
 @api.route('/products', methods=['GET'])
 def get_products():
     try:
