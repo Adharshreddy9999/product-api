@@ -64,7 +64,7 @@ python run.py
 The application will be available at:
 - Web Interface: http://localhost:5000
 - API Documentation: http://localhost:5000/api/docs
-- API Endpoints: http://localhost:5000/api/products
+- API Endpoints: http://localhost:5000/api/
 
 ## API Endpoints
 
