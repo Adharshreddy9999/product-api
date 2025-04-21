@@ -68,11 +68,6 @@ flask db upgrade
 flask run
 ```
 
-## API Documentation
-
-### Base URL
-`http://localhost:5000/api`
-
 ### Authentication
 Currently, the API does not require authentication.
 
